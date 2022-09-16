@@ -99,7 +99,8 @@ func (p OpCodeTrie) dump(db *sql.DB, statement *sql.Stmt) {
 		seq := node.get()
 		// dump sequences of length greater than 1 and
 		// number of executed instructions is beyond the threshold
-		if len(seq) > 1 && uint64(p.length)*p.frequency >= TotalInstructions*(100.0-ExecutionThreshold)/100.0 {
+		// if len(seq) > 1 && uint64(p.length)*p.frequency >= TotalInstructions*(100.0-ExecutionThreshold)/100.0 {
+		if len(seq) > 1 {
 			bseq := []byte(string(seq))
 			// commit db transaction when maximal number of record per transaction
 			// is reached.
@@ -123,6 +124,7 @@ func (p OpCodeTrie) dump(db *sql.DB, statement *sql.Stmt) {
 // read basic block frequency database
 func readBasicBlockFrequency() {
 	// open sqlite3 database
+	// TODO: Commandline option for database name
 	db, err := sql.Open("sqlite3", "./basicblocks.db")
 	if err != nil {
 		log.Fatal(err.Error())
@@ -176,6 +178,7 @@ func writeFrequencies(trie *OpCodeTrie) {
 	// Dump basic-block frequency statistics into a SQLITE3 database
 
 	// open sqlite3 database
+	// TODO: Commandline option for database name
 	db, err := sql.Open("sqlite3", "./super-instructions.db") // Open the created SQLite File
 	if err != nil {
 		log.Fatal(err.Error())
