@@ -27,6 +27,7 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/tsdb v0.10.0 // indirect
@@ -38,8 +39,14 @@ require (
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 )
 
+<<<<<<< HEAD
 replace github.com/ethereum/go-ethereum => /home/scholz/Projects/go-ethereum-substate
 
 replace github.com/Fantom-foundation/go-opera => /home/scholz/Projects/go-opera-substate
+=======
+replace github.com/ethereum/go-ethereum => github.com/Fantom-foundation/go-ethereum-substate v1.1.0
+
+replace github.com/Fantom-foundation/go-opera => github.com/Fantom-foundation/go-opera-substate v1.0.0
+>>>>>>> 2272e9e810838acb5f6532b77738aa3d7f62cbef
 
 replace github.com/dvyukov/go-fuzz => github.com/guzenok/go-fuzz v0.0.0-20210103140116-f9104dfb626f
