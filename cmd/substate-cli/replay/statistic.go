@@ -3,10 +3,9 @@ package replay
 import (
 	"fmt"
 	"sort"
-	"strconv"
 
 	"github.com/ethereum/go-ethereum/substate"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli/v2"
 )
 
 // -------------------- Access Statistic Data Structure --------------------------
@@ -99,7 +98,7 @@ func getReferenceStatsAction[T comparable](ctx *cli.Context, cli_command string,
 func getReferenceStatsActionWithConsumer[T comparable](ctx *cli.Context, cli_command string, extract Extractor[T], consume AccessStatisticsConsumer[T]) error {
 	var err error
 
-	if len(ctx.Args()) != 2 {
+	if ctx.Args().Len() != 2 {
 		return fmt.Errorf("substate-cli %v command requires exactly 2 arguments", cli_command)
 	}
 
@@ -109,16 +108,9 @@ func getReferenceStatsActionWithConsumer[T comparable](ctx *cli.Context, cli_com
 	fmt.Printf("git-commit: %v\n", gitCommit)
 	fmt.Printf("contract-db: %v\n", ContractDB)
 
-	first, ferr := strconv.ParseInt(ctx.Args().Get(0), 10, 64)
-	last, lerr := strconv.ParseInt(ctx.Args().Get(1), 10, 64)
-	if ferr != nil || lerr != nil {
-		return fmt.Errorf("substate-cli %v: error in parsing parameters: block number not an integer", cli_command)
-	}
-	if first < 0 || last < 0 {
-		return fmt.Errorf("substate-cli %v: error: block number must be greater than 0", cli_command)
-	}
-	if first > last {
-		return fmt.Errorf("substate-cli %v: error: first block has larger number than last block", cli_command)
+	first, last, argErr := SetBlockRange(ctx.Args().Get(0), ctx.Args().Get(1))
+	if argErr != nil {
+		return argErr
 	}
 
 	substate.SetSubstateFlags(ctx)
@@ -137,7 +129,7 @@ func getReferenceStatsActionWithConsumer[T comparable](ctx *cli.Context, cli_com
 	}
 
 	// Process all transactions in parallel, out-of-order.
-	taskPool := substate.NewSubstateTaskPool(fmt.Sprintf("substate-cli %v", cli_command), task, uint64(first), uint64(last), ctx)
+	taskPool := substate.NewSubstateTaskPool(fmt.Sprintf("substate-cli %v", cli_command), task, first, last, ctx)
 	err = taskPool.Execute()
 	if err != nil {
 		return err

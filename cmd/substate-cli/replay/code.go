@@ -3,13 +3,12 @@ package replay
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/substate"
 	"github.com/syndtr/goleveldb/leveldb"
-	cli "gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli/v2"
 )
 
 // record-replay: substate-cli code command
@@ -19,10 +18,10 @@ var GetCodeCommand = cli.Command{
 	Usage:     "write all contracts into a database",
 	ArgsUsage: "<blockNumFirst> <blockNumLast>",
 	Flags: []cli.Flag{
-		substate.WorkersFlag,
-		substate.SubstateDirFlag,
-		ContractDBFlag,
-		ChainIDFlag,
+		&substate.WorkersFlag,
+		&substate.SubstateDirFlag,
+		&ContractDBFlag,
+		&ChainIDFlag,
 	},
 	Description: `
 The substate-cli code command requires two arguments:
@@ -35,12 +34,6 @@ The contracts of the block range are written into a levelDB database.
 `,
 }
 
-// contract-db filename
-var ContractDBFlag = cli.StringFlag{
-	Name:  "contractdb",
-	Usage: "Contract database name for smart contracts",
-	Value: "./contracts.db",
-}
 var ContractDB = ContractDBFlag.Value
 
 // registry to keep track the bytecode of a smart contract
@@ -91,7 +84,7 @@ func getCodeTask(block uint64, tx int, st *substate.Substate, taskPool *substate
 func getCodeAction(ctx *cli.Context) error {
 	var err error
 
-	if len(ctx.Args()) != 2 {
+	if ctx.Args().Len() != 2 {
 		return fmt.Errorf("substate-cli storage command requires exactly 2 arguments")
 	}
 
@@ -101,16 +94,9 @@ func getCodeAction(ctx *cli.Context) error {
 	fmt.Printf("git-commit: %v\n", gitCommit)
 	fmt.Printf("contract-db: %v\n", ContractDB)
 
-	first, ferr := strconv.ParseInt(ctx.Args().Get(0), 10, 64)
-	last, lerr := strconv.ParseInt(ctx.Args().Get(1), 10, 64)
-	if ferr != nil || lerr != nil {
-		return fmt.Errorf("substate-cli code: error in parsing parameters: block number not an integer")
-	}
-	if first < 0 || last < 0 {
-		return fmt.Errorf("substate-cli code: error: block number must be greater than 0")
-	}
-	if first > last {
-		return fmt.Errorf("substate-cli code: error: first block has larger number than last block")
+	first, last, argErr := SetBlockRange(ctx.Args().Get(0), ctx.Args().Get(1))
+	if argErr != nil {
+		return argErr
 	}
 
 	substate.SetSubstateFlags(ctx)
@@ -119,7 +105,7 @@ func getCodeAction(ctx *cli.Context) error {
 
 	CodeRegistry = make(map[common.Address][]byte)
 
-	taskPool := substate.NewSubstateTaskPool("substate-cli code", getCodeTask, uint64(first), uint64(last), ctx)
+	taskPool := substate.NewSubstateTaskPool("substate-cli code", getCodeTask, first, last, ctx)
 	err = taskPool.Execute()
 
 	writeContracts()
