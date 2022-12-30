@@ -47,7 +47,7 @@ func clone(ctx *cli.Context) error {
 		return fmt.Errorf("substate-cli db clone: error: first block has larger number than last block")
 	}
 
-	srcBackend, err := rawdb.NewLevelDBDatabase(srcPath, 1024, 100, "srcDB", true)
+	srcBackend, err := rawdb.NewLevelDBDatabase(srcPath, 1024, 100, "srcDB")
 	if err != nil {
 		return fmt.Errorf("substate-cli db clone: error opening %s: %v", srcPath, err)
 	}
@@ -55,7 +55,7 @@ func clone(ctx *cli.Context) error {
 	defer srcDB.Close()
 
 	// Create dst DB
-	dstBackend, err := rawdb.NewLevelDBDatabase(dstPath, 1024, 100, "srcDB", false)
+	dstBackend, err := rawdb.NewLevelDBDatabase(dstPath, 1024, 100, "srcDB")
 	if err != nil {
 		return fmt.Errorf("substate-cli db clone: error creating %s: %v", dstPath, err)
 	}

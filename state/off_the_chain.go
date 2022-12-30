@@ -80,14 +80,14 @@ func (db *offTheChainDB) TrieDB() *trie.Database {
 // NewOffTheChainStateDB returns an empty in-memory *state.StateDB without disk caches
 func NewOffTheChainStateDB() *state.StateDB {
 	// backend in-memory key-value database
-	kvdb := rawdb.NewMemoryDatabase()
+	//kvdb := rawdb.NewMemoryDatabase()
 
 	// zeroed trie.Config to disable Cache, Journal, Preimages, ...
-	zerodConfig := &trie.Config{}
-	tdb := trie.NewDatabaseWithConfig(kvdb, zerodConfig)
+	// zerodConfig := &trie.Config{}
+	// tdb := trie.NewDatabaseWithConfig(kvdb, zerodConfig)
 
 	sdb := &offTheChainDB{
-		db: tdb,
+		db: nil,
 	}
 
 	statedb, err := state.New(common.Hash{}, sdb, nil)
